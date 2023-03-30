@@ -196,10 +196,14 @@ class Trainer:
                                                                                    kl_weight=self.args.kl_weight,
                                                                                    use_FDEADE_aux_loss=self.args.use_FDEADE_aux_loss)
 
-                self.optimiser.zero_grad()
+
+                #########################################################################
+                self.optimiser.zero_grad() # clear the gradient
                 (nll_loss + adefde_loss + kl_loss).backward()
                 nn.utils.clip_grad_norm_(self.autobot_model.parameters(), self.args.grad_clip_norm)
                 self.optimiser.step()
+
+                ##########################################
 
                 self.writer.add_scalar("Loss/nll", nll_loss.item(), steps)
                 self.writer.add_scalar("Loss/adefde", adefde_loss.item(), steps)

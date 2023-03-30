@@ -7,27 +7,34 @@ from collections import namedtuple
 def get_train_args():
     parser = argparse.ArgumentParser(description="AutoBots")
     # Section: General Configuration
-    parser.add_argument("--exp-id", type=str, default=None, help="Experiment identifier")
-    parser.add_argument("--seed", type=int, default=0, help="Random seed")
+    parser.add_argument("--exp-id", type=str, default="fake", help="Experiment identifier")
+    parser.add_argument("--seed", type=int, default=2, help="Random seed")
     parser.add_argument("--disable-cuda", action="store_true", help="Disable CUDA")
     parser.add_argument("--save-dir", type=str, default=".", help="Directory for saving results")
 
     # Section: Dataset
-    parser.add_argument("--dataset", type=str, required=True, choices=["Argoverse", "Nuscenes", "trajnet++",
+    # parser.add_argument("--dataset", type=str, required=True, choices=["Argoverse", "Nuscenes", "trajnet++",
+    #                                                                    "interaction-dataset"],
+    #                     help="Dataset to train on.")
+    parser.add_argument("--dataset", type=str, default="Nuscenes", choices=["Argoverse", "Nuscenes", "trajnet++",
                                                                        "interaction-dataset"],
                         help="Dataset to train on.")
-    parser.add_argument("--dataset-path", type=str, required=True, help="Path to dataset files.")
+    # parser.add_argument("--dataset-path", type=str, required=True, help="Path to dataset files.")
+    parser.add_argument("--dataset-path", type=str, default="/data1/nuscenes/h5_files", help="Path to dataset files.")
+
     parser.add_argument("--use-map-image", type=bool, default=False, help="Use map image if applicable.")
-    parser.add_argument("--use-map-lanes", type=bool, default=False, help="Use map lanes if applicable.")
+    parser.add_argument("--use-map-lanes", type=bool, default=True, help="Use map lanes if applicable.")
 
     # Section: Algorithm
-    parser.add_argument("--model-type", type=str, required=True, choices=["Autobot-Joint", "Autobot-Ego"],
+    # parser.add_argument("--model-type", type=str, required=True, choices=["Autobot-Joint", "Autobot-Ego"],
+    #                     help="Whether to train for joint prediction or ego-only prediction.")
+    parser.add_argument("--model-type", type=str, default="Autobot-Ego", choices=["Autobot-Joint", "Autobot-Ego"],
                         help="Whether to train for joint prediction or ego-only prediction.")
-    parser.add_argument("--num-modes", type=int, default=5, help="Number of discrete latent variables for Autobot.")
+    parser.add_argument("--num-modes", type=int, default=10, help="Number of discrete latent variables for Autobot.")
     parser.add_argument("--hidden-size", type=int, default=128, help="Model's hidden size.")
-    parser.add_argument("--num-encoder-layers", type=int, default=1,
+    parser.add_argument("--num-encoder-layers", type=int, default=2,
                         help="Number of social-temporal layers in Autobot's encoder.")
-    parser.add_argument("--num-decoder-layers", type=int, default=1,
+    parser.add_argument("--num-decoder-layers", type=int, default=2,
                         help="Number of social-temporal layers in Autobot's decoder.")
     parser.add_argument("--tx-hidden-size", type=int, default=384,
                         help="hidden size of transformer layers' feedforward network.")
@@ -35,19 +42,21 @@ def get_train_args():
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout strenght used throughout model.")
 
     # Section: Loss Function
-    parser.add_argument("--entropy-weight", type=float, default=1.0, metavar="lamda", help="Weight of entropy loss.")
-    parser.add_argument("--kl-weight", type=float, default=1.0, metavar="lamda", help="Weight of entropy loss.")
+    parser.add_argument("--entropy-weight", type=float, default=40.0, metavar="lamda", help="Weight of entropy loss.")
+    parser.add_argument("--kl-weight", type=float, default=20.0, metavar="lamda", help="Weight of entropy loss.")
     parser.add_argument("--use-FDEADE-aux-loss", type=bool, default=True,
                         help="Whether to use FDE/ADE auxiliary loss in addition to NLL (accelerates learning).")
 
     # Section: Training params:
-    parser.add_argument("--batch-size", type=int, default=100, help="Batch size")
-    parser.add_argument("--learning-rate", type=float, default=1e-4, help="Learning rate")
+    parser.add_argument("--batch-size", type=int, default=64, help="Batch size")
+    parser.add_argument("--learning-rate", type=float, default=7.5e-4, help="Learning rate")
     parser.add_argument("--adam-epsilon", type=float, default=1e-4, help="Adam optimiser epsilon value")
-    parser.add_argument("--learning-rate-sched", type=int, nargs='+', default=[5, 10, 15, 20],
+    parser.add_argument("--learning-rate-sched", type=int, nargs='+', default=[10, 20, 30, 40, 50],
                         help="Learning rate Schedule.")
     parser.add_argument("--grad-clip-norm", type=float, default=5, metavar="C", help="Gradient clipping norm")
-    parser.add_argument("--num-epochs", type=int, default=150, metavar="I", help="number of iterations through the dataset.")
+    parser.add_argument("--num-epochs", type=int, default=1, metavar="I", help="number of iterations through the dataset.")
+
+    
     args = parser.parse_args()
 
     if args.use_map_image and args.use_map_lanes:

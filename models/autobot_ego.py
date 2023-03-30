@@ -209,7 +209,7 @@ class AutoBotEgo(nn.Module):
 
     def forward(self, ego_in, agents_in, roads):
         '''
-        :param ego_in: [B, T_obs, k_attr+1] with last values being the existence mask.
+        :param ego_in: [B, T_obs, k_attr+1] with last values being the existence mask. 
         :param agents_in: [B, T_obs, M-1, k_attr+1] with last values being the existence mask.
         :param roads: [B, S, P, map_attr+1] representing the road network if self.use_map_lanes or
                       [B, 3, 128, 128] image representing the road network if self.use_map_img or
@@ -219,6 +219,12 @@ class AutoBotEgo(nn.Module):
                                         Bivariate Gaussian distribution.
             mode_probs: shape [B, c] mode probability predictions P(z|X_{1:T_obs})
         '''
+        # ego_in [64,4,3]
+        # agents_in [64,4,7,3]
+        # roads [64,100,40,4] [Batch, Segment, Points, attributes ()]
+        # B should be batch
+        # T_obs should be observation Time (input time) 
+        # k_attr should be the number of the attributes at one timestamp, namely x, y, mask
         B = ego_in.size(0)
 
         # Encode all input observations (k_attr --> d_k)
@@ -230,7 +236,8 @@ class AutoBotEgo(nn.Module):
         for i in range(self.L_enc):
             agents_emb = self.temporal_attn_fn(agents_emb, opps_masks, layer=self.temporal_attn_layers[i])
             agents_emb = self.social_attn_fn(agents_emb, opps_masks, layer=self.social_attn_layers[i])
-        ego_soctemp_emb = agents_emb[:, :, 0]  # take ego-agent encodings only.
+        ego_soctemp_emb = agents_emb[:, :, 0]  # take ego-agent encodings only. 
+        # example shape:[4, 64, 128]
 
         # Process map information
         if self.use_map_img:

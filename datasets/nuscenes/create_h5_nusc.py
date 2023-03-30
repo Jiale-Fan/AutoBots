@@ -2,6 +2,8 @@ import argparse
 
 import h5py
 import os
+import sys
+sys.path.append('./')
 import numpy as np
 
 from datasets.nuscenes.raw_dataset import NuScenesDataset
@@ -26,6 +28,7 @@ def get_args():
 
 
 if __name__ == '__main__':
+     
     args = get_args()
     max_num_agents = 20
 
